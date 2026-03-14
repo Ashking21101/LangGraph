@@ -1,6 +1,6 @@
 import streamlit as st
 from new_langgraph_backend_sqlite import chatbot, retrieve_all_threads
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessageChunk
 import uuid
 
 # this file uses same langgraph_backend.py
@@ -86,14 +86,20 @@ if user_input:
         "run_name":"chat_turns"
     }
     # with streaming
+
+
     with st.chat_message("assistant"):
         ai_message = st.write_stream(
             message_chunk.content for message_chunk, metadata in chatbot.stream(
                 {"messages":[HumanMessage(content=user_input)]},
                 config=CONFIG,
-                stream_mode='messages'
+                stream_mode="messages"
             )
+            if isinstance(message_chunk, AIMessageChunk) and message_chunk.content
         )
+
+
+
     st.session_state.message_history.append({"role": "assistant", "content": ai_message})
 
 
